@@ -47,14 +47,17 @@ call plug#end()
 
 
 
-
-
+" Use deoplete.
+let g:deoplete#enable_at_startup = 1
 
 " disable autocompletion, cause we use deoplete for completion 
 let g:jedi#completions_enabled = 0  
 
 " open the go-to function in split, not another buffer 
 let g:jedi#use_splits_not_buffers = "right"
+
+" Tell python path to jedi-vim for usage
+let g:deoplete#sources#jedi#python_path = 'python' 
 
 " set neomake as python code checker
 let g:neomake_python_enabled_makers = ['pylint']
@@ -126,6 +129,4 @@ autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree Desktop | en
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""Leave Terminal with Escape key"""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n>
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""chdir when file/buffer/tab changes""""""""""""""""""""""""""""""""""""""""
-autocmd BufEnter * lcd %:p:h
 
