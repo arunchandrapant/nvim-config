@@ -1,10 +1,10 @@
 call plug#begin('~/.local/share/nvim/plugged')
 
-" Auto-complete plugin
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" ALE for asynchronous linting
+Plug 'dense-analysis/ale'
 
-" Auto-complete for python
-Plug 'zchee/deoplete-jedi'
+" COC for code completion
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Status-bar plugin
 Plug 'vim-airline/vim-airline'
@@ -18,17 +18,8 @@ Plug 'jiangmiao/auto-pairs'
 " For comments
 Plug 'scrooloose/nerdcommenter'
 
-" For code formatting
-Plug 'sbdchd/neoformat'
-
-" For code jump
-Plug 'davidhalter/jedi-vim'
-
 " For file explorer
 Plug 'scrooloose/nerdtree'
-
-" Code checker plugin
-Plug 'neomake/neomake'
 
 " Highlight the yanked area
 Plug 'machakann/vim-highlightedyank'
@@ -42,31 +33,16 @@ Plug 'morhetz/gruvbox'
 " REPL functionality for vim
 Plug 'jalvesaq/vimcmdline'
 
+" Plugin for session management
+Plug 'mhinz/vim-startify'
+
+" For creating tags for easier code navigation
+Plug 'liuchengxu/vista.vim'
+
+" Plugin for golang development
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+
 call plug#end()
-
-
-
-
-" Use deoplete.
-let g:deoplete#enable_at_startup = 1
-
-" disable autocompletion, cause we use deoplete for completion 
-let g:jedi#completions_enabled = 0  
-
-" open the go-to function in split, not another buffer 
-let g:jedi#use_splits_not_buffers = "right"
-
-" Tell python path to jedi-vim for usage
-let g:deoplete#sources#jedi#python_path = 'python' 
-
-" set neomake as python code checker
-let g:neomake_python_enabled_makers = ['pylint']
-
-" neomake: don't show error next to the line
-let g:neomake_virtualtext_current_error = 0
-
-" for automatic checking
-call neomake#configure#automake('nrwi', 500)
 
 " making highlightedyank plugin work correctly on some themes
 hi HighlightedyankRegion cterm=reverse gui=reverse
@@ -78,10 +54,22 @@ set background=dark " use dark mode
 "set background=light
 
 " show line numbers on left
-set number
+set number relativenumber
+
+"""""""""""""""""""""""""""""""""""""""""""""""Highlight line while in insert mode""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+:autocmd InsertEnter * set cul
+:autocmd InsertLeave * set nocul
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""Line number settings"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" https://jeffkreeftmeijer.com/vim-number/
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+augroup END
 
 " let vim use system clipboard for copy/paste
-set clipboard=unnamed
+set clipboard+=unnamedplus
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""vimcmdline (repl) options"""""""""""""""""""""""""""""""""
 " vimcmdline options
@@ -94,8 +82,7 @@ let cmdline_tmp_dir     = '/tmp' " Temporary directory to save files
 let cmdline_outhl       = 1      " Syntax highlight the output
 let cmdline_auto_scroll = 1      " Keep the cursor at the end of terminal (nvim)
 
-let cmdline_app           = {}
-let cmdline_app['python'] = 'defpy'
+let cmdline_app           = {'python': 'python'}
 
 " vimcmdline mappings
 let cmdline_map_start          = '<LocalLeader>s'
@@ -106,7 +93,10 @@ let cmdline_map_send_paragraph = '<LocalLeader>p'
 let cmdline_map_send_block     = '<LocalLeader>b'
 let cmdline_map_quit           = '<LocalLeader>q'
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""NERDTree configurations"""""""""""""""""""""""""""""""""
+" vimcmdline colorscheme options
+let cmdline_follow_colorscheme = 1
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""NERDTree configurations"""""""""""""""""""""""""""""""""
 " shortcut for opening nerdtree
 nnoremap <Leader>nt :NERDTreeToggle<Enter>
 
@@ -125,6 +115,9 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isT
 " automatically open nerdtree
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree Desktop | endif
+
+" open nerdtree in highlighted buffer instead of a drawer
+let NERDTreeHijackNetrw=1
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""Leave Terminal with Escape key"""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n>
