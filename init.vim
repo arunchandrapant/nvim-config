@@ -1,5 +1,8 @@
 call plug#begin('~/.local/share/nvim/plugged')
 
+" pylint and flake8 required from pip for ale to work
+" mypy is required for type checking through ale
+" yapf is required for auto formatting by ale
 " ALE for asynchronous linting
 Plug 'dense-analysis/ale'
 
@@ -41,6 +44,12 @@ Plug 'liuchengxu/vista.vim'
 
 " Plugin for golang development
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+
+" Plugin for improving tabline in terminal
+Plug 'mkitt/tabline.vim'
+
+" Plugin for better syntax highlighting in python
+Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 
 call plug#end()
 
@@ -121,5 +130,23 @@ let NERDTreeHijackNetrw=1
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""Leave Terminal with Escape key"""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n>
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""Python Specific Settings""""""""""""""""""""""""""""""""""""""""""""""""""
+" set yapf for formatting python. Set auto formatting on save
+let g:ale_fixers = {'python': ['yapf'],}
+let g:ale_fix_on_save = 1
+
+" use coc and jedi to go to function definition
+nmap <silent> gd <Plug>(coc-definition)
+
+" displaying documentation is floating window
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
 
 
