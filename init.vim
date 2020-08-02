@@ -1,8 +1,15 @@
 call plug#begin('~/.local/share/nvim/plugged')
 
+" to load python plugins pynvim is required
+" pip install pynvim
+
 " pylint and flake8 required from pip for ale to work
 " mypy is required for type checking through ale
 " yapf is required for auto formatting by ale
+" pip install pylint flake8 mypy yapf
+" jedi is required by coc for autocompletion and other functionality. First
+" ..... install coc-python plugin
+
 " ALE for asynchronous linting
 Plug 'dense-analysis/ale'
 
@@ -148,5 +155,4 @@ function! s:show_documentation()
     call CocAction('doHover')
   endif
 endfunction
-
 

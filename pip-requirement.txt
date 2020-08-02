@@ -1,0 +1,6 @@
+pynvim
+flake8
+pylint
+mypy
+yapf
+jedi
