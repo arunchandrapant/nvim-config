@@ -10,7 +10,7 @@ endif
 
 
 " All the plugins that need to be loaded
-call plug#begin()
+call plug#begin(stdpath('data') . '/plugged')
 
 " to load python plugins pynvim is required
 " pip install pynvim
