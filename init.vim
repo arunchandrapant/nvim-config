@@ -1,4 +1,16 @@
-call plug#begin('~/.local/share/nvim/plugged')
+" If running nvim for the first time, this section will ensure that..........
+"..... vim-plug is automatically installed and all the plugins get installed
+
+let autoload_plug_path = stdpath('data') . '/site/autoload/plug.vim'
+if empty(glob(autoload_plug_path))
+  silent execute '!curl -fLo ' . autoload_plug_path . ' --create-dirs
+    \ "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+
+" All the plugins that need to be loaded
+call plug#begin()
 
 " to load python plugins pynvim is required
 " pip install pynvim
@@ -7,7 +19,7 @@ call plug#begin('~/.local/share/nvim/plugged')
 " mypy is required for type checking through ale
 " yapf is required for auto formatting by ale
 " pip install pylint flake8 mypy yapf
-" jedi is required by coc for autocompletion and other functionality. First
+" jedi is required by coc for autocompletion and other functionality. First .....
 " ..... install coc-python plugin
 
 " ALE for asynchronous linting
@@ -59,6 +71,7 @@ Plug 'mkitt/tabline.vim'
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 
 call plug#end()
+
 
 " making highlightedyank plugin work correctly on some themes
 hi HighlightedyankRegion cterm=reverse gui=reverse
