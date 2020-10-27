@@ -21,6 +21,21 @@ call plug#begin(stdpath('data') . '/plugged')
 " pip install pylint flake8 mypy yapf
 " jedi is required by coc for autocompletion and other functionality. First .....
 " ..... install coc-python plugin
+"
+
+" C/C++ SETUP FOR AUTOCOMPLETION
+" Install coc.nvim using plug
+" Install nodejs and npm
+" Install :CocInstall coc-clangd
+" Install clangd - sudo apt install clangd-9
+"
+
+" RUST SETUP FOR AUTOCOMPLETE-LINTING-FORMATTING etc.
+" Install coc.nvim using plug
+" Install nodejs and npm
+" Install rust toolchain components - rustup component add rls rust-analysis rust-src
+" Install :CocInstall coc-rls
+
 
 " ALE for asynchronous linting
 Plug 'dense-analysis/ale'
@@ -69,6 +84,10 @@ Plug 'mkitt/tabline.vim'
 
 " Plugin for better syntax highlighting in python
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+
+" Many functions in Rust
+Plug 'rust-lang/rust.vim'
+
 
 call plug#end()
 
@@ -151,6 +170,11 @@ let NERDTreeHijackNetrw=1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""Leave Terminal with Escape key"""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n>
 
+""""""""""""""""""""""""""""""""""""""""""Vista Plugin settings""""""""""""""""""""""""""""""""""""""""""
+"set coc as default tag provider
+let g:vista_default_executive = 'coc'
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""Python Specific Settings""""""""""""""""""""""""""""""""""""""""""""""""""
 " set yapf for formatting python. Set auto formatting on save
 let g:ale_fixers = {'python': ['yapf'],}
@@ -168,4 +192,13 @@ function! s:show_documentation()
     call CocAction('doHover')
   endif
 endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""C/C++ SPECIFIC SETTINGS"""""""""""""""""""""""""""""""""""""""""""""
+" Using ale for linting
+let g:ale_linters = {
+    \ 'vim': ['vint'],
+    \ 'cpp': ['clang'],
+    \ 'c': ['clang']
+\}
+
 
