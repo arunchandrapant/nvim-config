@@ -36,12 +36,17 @@ call plug#begin(stdpath('data') . '/plugged')
 " Install rust toolchain components - rustup component add rls rust-analysis rust-src
 " Install :CocInstall coc-rls
 
+" Disable polyglot to trigger for go
+let g:polyglot_disabled = ['go']
 
 " ALE for asynchronous linting
 Plug 'dense-analysis/ale'
 
 " COC for code completion
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" For syntax and indentation support for most languages
+Plug 'sheerun/vim-polyglot'
 
 " Status-bar plugin
 Plug 'vim-airline/vim-airline'
@@ -88,6 +93,9 @@ Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 " Many functions in Rust
 Plug 'rust-lang/rust.vim'
 
+" Theme inspired by vs code dark mode
+Plug 'tomasiser/vim-code-dark'
+
 
 call plug#end()
 
@@ -96,13 +104,20 @@ call plug#end()
 hi HighlightedyankRegion cterm=reverse gui=reverse
 
 " set colorscheme
-colorscheme gruvbox
+colorscheme codedark
+let g:airline_theme = 'codedark'
 
 set background=dark " use dark mode
 "set background=light
 
 " show line numbers on left
 set number relativenumber
+
+" Set tab settings
+" size of a hard tabstop
+set tabstop=4
+" size of an indent
+set shiftwidth=4
 
 """""""""""""""""""""""""""""""""""""""""""""""Highlight line while in insert mode""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 :autocmd InsertEnter * set cul
@@ -198,7 +213,67 @@ endfunction
 let g:ale_linters = {
     \ 'vim': ['vint'],
     \ 'cpp': ['clang'],
-    \ 'c': ['clang']
+    \ 'c': ['clang'],
+    \ 'go': ['golint', 'go vet']
 \}
 
+""""""""""""""""""""""""""""""""""""" Auto install COC extensions """""""""""""""""""""""""""""""""""""
+let g:coc_global_extensions = ['coc-json', 'coc-python', 'coc-tsserver']
 
+""""""""""""""""""""""""""""""""""""Go settings """"""""""""""""""""""""""""""""""""
+
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
+endfunction
+
+let g:go_highlight_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_function_calls = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_build_constraints = 1
+let g:go_highlight_structs = 1
+let g:go_highlight_generate_tags = 1
+let g:go_highlight_space_tab_error = 0
+let g:go_highlight_array_whitespace_error = 0
+let g:go_highlight_trailing_whitespace_error = 0
+let g:go_highlight_extra_types = 1
+
+let g:go_fmt_experimental=1
+"let g:go_metalinter_autosave=1
+"let g:go_metalinter_autosave_enabled=['golint', 'govet']
+
+let g:gofmt_autosave = 1
+
+let g:go_imports_autosave = 1
+
+augroup go
+
+au!
+au Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+au Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+au Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+au Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+
+au FileType go nmap <Leader>dd <Plug>(go-def-vertical)
+au FileType go nmap <Leader>dv <Plug>(go-doc-vertical)
+au FileType go nmap <Leader>db <Plug>(go-doc-browser)
+
+au FileType go nmap <leader>r  <Plug>(go-run)
+au FileType go nmap <leader>t  <Plug>(go-test)
+au FileType go nmap <Leader>gt <Plug>(go-coverage-toggle)
+au FileType go nmap <Leader>i <Plug>(go-info)
+au FileType go nmap <silent> <Leader>l <Plug>(go-metalinter)
+au FileType go nmap <C-g> :GoDecls<cr>
+au FileType go nmap <leader>dr :GoDeclsDir<cr>
+au FileType go imap <C-g> <esc>:<C-u>GoDecls<cr>
+au FileType go imap <leader>dr <esc>:<C-u>GoDeclsDir<cr>
+au FileType go nmap <leader>rb :<C-u>call <SID>build_go_files()<CR>
+
+augroup END
