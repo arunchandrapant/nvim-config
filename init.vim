@@ -218,7 +218,21 @@ let g:ale_linters = {
 \}
 
 """"""""""""""""""""""""""""""""""""" Auto install COC extensions """""""""""""""""""""""""""""""""""""
-let g:coc_global_extensions = ['coc-json', 'coc-python', 'coc-tsserver']
+let g:coc_global_extensions = ['coc-json', 'coc-python', 'coc-tsserver', 'coc-snippets']
+
+"""""""""""""""""""""""""""""""""""COC settings"""""""""""""""""""""""""""""""""""
+""Map <tab> to trigger completion and navigate to the next item: >
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~ '\s'
+endfunction
+
+inoremap <silent><expr> <TAB>
+	\ pumvisible() ? "\<C-n>" :
+	\ <SID>check_back_space() ? "\<TAB>" :
+	\ coc#refresh()
+
+
 
 """"""""""""""""""""""""""""""""""""Go settings """"""""""""""""""""""""""""""""""""
 
@@ -277,3 +291,6 @@ au FileType go imap <leader>dr <esc>:<C-u>GoDeclsDir<cr>
 au FileType go nmap <leader>rb :<C-u>call <SID>build_go_files()<CR>
 
 augroup END
+
+"""""""""""""""""""""""""""""""""""""""" Haskell settings """"""""""""""""""""""""""""""""""""""""
+autocmd FileType haskell setlocal shiftwidth=4 shiftround softtabstop=4 tabstop=8 expandtab 
