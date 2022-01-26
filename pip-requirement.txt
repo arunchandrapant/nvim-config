@@ -4,3 +4,5 @@ pylint
 mypy
 yapf
 jedi
+black
+isort

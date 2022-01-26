@@ -1,0 +1,6 @@
+{
+	"python.formatting.provider": "black",
+	"python.formatting.blackPath": "black",
+	"coc.preferences.formatOnSaveFiletypes": ["python"],
+	"python.linting.pylintEnabled": true,
+}

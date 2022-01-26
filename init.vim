@@ -17,7 +17,7 @@ call plug#begin(stdpath('data') . '/plugged')
 
 " pylint and flake8 required from pip for ale to work
 " mypy is required for type checking through ale
-" yapf is required for auto formatting by ale
+" black is used for autoformatting. earlier yapf was used
 " pip install pylint flake8 mypy yapf
 " jedi is required by coc for autocompletion and other functionality. First .....
 " ..... install coc-python plugin
@@ -95,6 +95,12 @@ Plug 'rust-lang/rust.vim'
 
 " Theme inspired by vs code dark mode
 Plug 'tomasiser/vim-code-dark'
+
+" For git commands integration into vim
+Plug 'tpope/vim-fugitive'
+
+" For git changes viewing while editing file
+Plug 'mhinz/vim-signify'
 
 
 call plug#end()
@@ -191,9 +197,9 @@ let g:vista_default_executive = 'coc'
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""Python Specific Settings""""""""""""""""""""""""""""""""""""""""""""""""""
-" set yapf for formatting python. Set auto formatting on save
-let g:ale_fixers = {'python': ['yapf'],}
-let g:ale_fix_on_save = 1
+" set black for formatting python. Set auto formatting on save
+" let g:ale_fixers = {'python': ['black', 'isort'],}
+" let g:ale_fix_on_save = 1
 
 " use coc and jedi to go to function definition
 nmap <silent> gd <Plug>(coc-definition)
@@ -208,6 +214,9 @@ function! s:show_documentation()
   endif
 endfunction
 
+" auto sort imports on save. use coc-pyright to sort
+autocmd BufWritePre *.py :silent call CocAction('runCommand', 'editor.action.organizeImport')
+
 """"""""""""""""""""""""""""""""""""""""""""C/C++ SPECIFIC SETTINGS"""""""""""""""""""""""""""""""""""""""""""""
 " Using ale for linting
 let g:ale_linters = {
@@ -218,7 +227,7 @@ let g:ale_linters = {
 \}
 
 """"""""""""""""""""""""""""""""""""" Auto install COC extensions """""""""""""""""""""""""""""""""""""
-let g:coc_global_extensions = ['coc-json', 'coc-python', 'coc-tsserver', 'coc-snippets']
+let g:coc_global_extensions = ['coc-json', 'coc-pyright', 'coc-tsserver', 'coc-snippets']
 
 """""""""""""""""""""""""""""""""""COC settings"""""""""""""""""""""""""""""""""""
 ""Map <tab> to trigger completion and navigate to the next item: >
