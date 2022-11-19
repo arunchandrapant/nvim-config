@@ -39,11 +39,16 @@ call plug#begin(stdpath('data') . '/plugged')
 " Disable polyglot to trigger for go
 let g:polyglot_disabled = ['go']
 
+" LSP client
+Plug 'prabirshrestha/vim-lsp'
+" Easily install LSP servers for various languages
+Plug 'mattn/vim-lsp-settings'
+" Autocomplete plugin
+Plug 'prabirshrestha/asyncomplete.vim'
+
+
 " ALE for asynchronous linting
 Plug 'dense-analysis/ale'
-
-" COC for code completion
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " For syntax and indentation support for most languages
 Plug 'sheerun/vim-polyglot'
@@ -59,9 +64,6 @@ Plug 'jiangmiao/auto-pairs'
 
 " For comments
 Plug 'scrooloose/nerdcommenter'
-
-" For file explorer
-"Plug 'scrooloose/nerdtree'
 
 " Highlight the yanked area
 Plug 'machakann/vim-highlightedyank'
@@ -87,9 +89,6 @@ Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 " Plugin for improving tabline in terminal
 Plug 'mkitt/tabline.vim'
 
-" Plugin for better syntax highlighting in python
-Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
-
 " Many functions in Rust
 Plug 'rust-lang/rust.vim'
 
@@ -111,10 +110,9 @@ Plug 'junegunn/fzf.vim'
 " Change current working director to project root
 Plug 'airblade/vim-rooter'
 
-" requires
-Plug 'kyazdani42/nvim-web-devicons' " for file icons
-Plug 'kyazdani42/nvim-tree.lua'
-
+" File tree explorer
+Plug 'nvim-tree/nvim-web-devicons' " optional, for file icons
+Plug 'nvim-tree/nvim-tree.lua'
 
 call plug#end()
 
@@ -159,6 +157,48 @@ augroup END
 " let vim use system clipboard for copy/paste
 set clipboard+=unnamedplus
 
+
+"""""""""""""""""""""""""""""""""""""""""""""""vim-lsp settings"""""""""""""""""""""""""""""""""""""""""""""""
+
+if executable('pylsp')
+    " pip install python-lsp-server
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pylsp',
+        \ 'cmd': {server_info->['pylsp']},
+        \ 'allowlist': ['python'],
+        \ })
+endif
+
+function! s:on_lsp_buffer_enabled() abort
+    setlocal omnifunc=lsp#complete
+    setlocal signcolumn=yes
+    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+    nmap <buffer> gd <plug>(lsp-definition)
+    nmap <buffer> gs <plug>(lsp-document-symbol-search)
+    nmap <buffer> gS <plug>(lsp-workspace-symbol-search)
+    nmap <buffer> gr <plug>(lsp-references)
+    nmap <buffer> gi <plug>(lsp-implementation)
+    nmap <buffer> gt <plug>(lsp-type-definition)
+    nmap <buffer> <leader>rn <plug>(lsp-rename)
+    nmap <buffer> [g <plug>(lsp-previous-diagnostic)
+    nmap <buffer> ]g <plug>(lsp-next-diagnostic)
+    nmap <buffer> K <plug>(lsp-hover)
+    nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
+
+    let g:lsp_format_sync_timeout = 1000
+    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
+    
+    " refer to doc to add more commands
+endfunction
+
+augroup lsp_install
+    au!
+    " call s:on_lsp_buffer_enabled only for languages that has the server registered.
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+augroup END
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""vimcmdline (repl) options"""""""""""""""""""""""""""""""""
 " vimcmdline options
 let cmdline_vsplit      = 1      " Split the window vertically
@@ -184,109 +224,18 @@ let cmdline_map_quit           = '<LocalLeader>q'
 " vimcmdline colorscheme options
 let cmdline_follow_colorscheme = 1
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""NERDTree configurations"""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""Nvim Tree configurations"""""""""""""""""""""""""""""""""
+lua require'nvim-tree'.setup {}
+lua vim.g.loaded_netrw = 1
+lua vim.g.loaded_netrwPlugin = 1
 
-" vimrc
-let g:nvim_tree_indent_markers = 1 "0 by default, this option shows indent markers when folders are open
-let g:nvim_tree_git_hl = 1 "0 by default, will enable file highlight for git attributes (can be used without the icons).
-let g:nvim_tree_highlight_opened_files = 1 "0 by default, will enable folder and file icon highlight for opened files/directories.
-let g:nvim_tree_root_folder_modifier = ':~' "This is the default. See :help filename-modifiers for more options
-let g:nvim_tree_add_trailing = 1 "0 by default, append a trailing slash to folder names
-let g:nvim_tree_group_empty = 1 " 0 by default, compact folders that only contain a single folder into one node in the file tree
-let g:nvim_tree_disable_window_picker = 1 "0 by default, will disable the window picker.
-let g:nvim_tree_icon_padding = ' ' "one space by default, used for rendering the space between the icon and the filename. Use with caution, it could break rendering if you set an empty string depending on your font.
-let g:nvim_tree_symlink_arrow = ' >> ' " defaults to ' ➛ '. used as a separator between symlinks' source and target.
-let g:nvim_tree_respect_buf_cwd = 1 "0 by default, will change cwd of nvim-tree to that of new buffer's when opening nvim-tree.
-let g:nvim_tree_create_in_closed_folder = 0 "1 by default, When creating files, sets the path of a file when cursor is on a closed folder to the parent folder when 0, and inside the folder when 1.
-let g:nvim_tree_window_picker_exclude = {
-	\   'filetype': [
-	\     'notify',
-	\     'packer',
-	\     'qf'
-	\   ],
-	\   'buftype': [
-	\     'terminal'
-	\   ]
-	\ }
-" Dictionary of buffer option names mapped to a list of option values that
-" indicates to the window picker that the buffer's window should not be
-" selectable.
-let g:nvim_tree_special_files = { 'README.md': 1, 'Makefile': 1, 'MAKEFILE': 1 } " List of filenames that gets highlighted with NvimTreeSpecialFile
-let g:nvim_tree_show_icons = {
-	\ 'git': 1,
-	\ 'folders': 0,
-	\ 'files': 0,
-	\ 'folder_arrows': 0,
-	\ }
-"If 0, do not show the icons for one of 'git' 'folder' and 'files'
-"1 by default, notice that if 'files' is 1, it will only display
-"if nvim-web-devicons is installed and on your runtimepath.
-"if folder is 1, you can also tell folder_arrows 1 to show small arrows next to the folder icons.
-"but this will not work when you set indent_markers (because of UI conflict)
-
-" default will show icon by default if no icon is provided
-" default shows no icon by default
-let g:nvim_tree_icons = {
-	\ 'default': '',
-	\ 'symlink': '',
-	\ 'git': {
-	\   'unstaged': "✗",
-	\   'staged': "✓",
-	\   'unmerged': "",
-	\   'renamed': "➜",
-	\   'untracked': "★",
-	\   'deleted': "",
-	\   'ignored': "◌"
-	\   },
-	\ 'folder': {
-	\   'arrow_open': "",
-	\   'arrow_closed': "",
-	\   'default': "",
-	\   'open': "",
-	\   'empty': "",
-	\   'empty_open': "",
-	\   'symlink': "",
-	\   'symlink_open': "",
-	\   }
-	\ }
+lua vim.opt.termguicolors = true
 
 nnoremap <leader>d :NvimTreeToggle<CR>
 nnoremap <leader>r :NvimTreeRefresh<CR>
 nnoremap <leader>n :NvimTreeFindFile<CR>
 " NvimTreeOpen, NvimTreeClose, NvimTreeFocus, NvimTreeFindFileToggle, and NvimTreeResize are also available if you need them
 
-set termguicolors " this variable must be enabled for colors to be applied properly
-
-" a list of groups can be found at `:help nvim_tree_highlight`
-highlight NvimTreeFolderIcon guibg=blue
-
-lua require'nvim-tree'.setup()
-
-
-"" shortcut for opening nerdtree
-"nnoremap <leader>nt :nerdtreetoggle<enter>
-
-"" close nerdtree after file opens
-"let nerdtreequitonopen = 1
-
-"" set default width of nerdtree window
-"let nerdtreewinsize = 40					  
-"" arrow symbols for nerd tree
-"let g:nerdtreedirarrowexpandable = '▸'
-"let g:nerdtreedirarrowcollapsible = '▾'
-
-"" close nerdtree if it is the only windows open after all others have closed
-"autocmd bufenter * if (winnr("$") == 1 && exists("b:nerdtree") && b:nerdtree.istabtree()) | q | endif
-
-"" open the existing nerdtree on each new tab.
-"autocmd bufwinenter * silent nerdtreemirror
-
-"" automatically open nerdtree
-"autocmd stdinreadpre * let s:std_in=1
-"autocmd vimenter * if argc() == 0 && !exists("s:std_in") | nerdtree desktop | endif
-
-"" open nerdtree in highlighted buffer instead of a drawer
-"let nerdtreehijacknetrw=1
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""Leave Terminal with Escape key"""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n>
@@ -325,23 +274,6 @@ let g:ale_linters = {
     \ 'c': ['clang'],
     \ 'go': ['golint', 'go vet']
 \}
-
-""""""""""""""""""""""""""""""""""""" Auto install COC extensions """""""""""""""""""""""""""""""""""""
-let g:coc_global_extensions = ['coc-json', 'coc-pyright', 'coc-tsserver', 'coc-snippets']
-
-"""""""""""""""""""""""""""""""""""COC settings"""""""""""""""""""""""""""""""""""
-""Map <tab> to trigger completion and navigate to the next item: >
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~ '\s'
-endfunction
-
-inoremap <silent><expr> <TAB>
-	\ pumvisible() ? "\<C-n>" :
-	\ <SID>check_back_space() ? "\<TAB>" :
-	\ coc#refresh()
-
-
 
 """"""""""""""""""""""""""""""""""""Go settings """"""""""""""""""""""""""""""""""""
 
